@@ -24,10 +24,16 @@ const app = express();
 const PORT = process.env.PORT ?? 5000;
 
 // ── CORS ────────────────────────────────────────────────────────────────────
-const allowedOrigins = (process.env.CLIENT_URL ?? "http://localhost:5173")
+const envOrigins = (process.env.CLIENT_URL || "")
   .split(",")
   .map((o) => o.trim())
   .filter(Boolean);
+
+const allowedOrigins = [
+  "https://nsi-preview.vercel.app",
+  "http://localhost:5173",
+  ...envOrigins
+];
 
 app.use(
   cors({
@@ -39,6 +45,7 @@ app.use(
         callback(new Error(`Origin ${origin} not allowed by CORS`));
       }
     },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
