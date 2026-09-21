@@ -21,6 +21,8 @@ export interface IProduct extends Document {
   productCode: string;
   amazonUrl: string;
   flipkartUrl: string;
+  myntraUrl: string;
+  whatsappOrder: boolean;
   featured: boolean;
   bulkAvailable: boolean;
   status: "Published" | "Draft";
@@ -56,6 +58,8 @@ const productSchema = new Schema<IProduct>(
     productCode: { type: String, default: "", trim: true },
     amazonUrl: { type: String, default: "" },
     flipkartUrl: { type: String, default: "" },
+    myntraUrl: { type: String, default: "" },
+    whatsappOrder: { type: Boolean, default: true },
     featured: { type: Boolean, default: false },
     bulkAvailable: { type: Boolean, default: true },
     status: { type: String, enum: ["Published", "Draft"], default: "Draft" },

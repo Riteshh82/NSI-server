@@ -1,14 +1,35 @@
 import { Router, Request, Response } from "express";
 import { Category } from "../models/Category";
+import { Product } from "../models/Product";
 import { protect } from "../middleware/auth";
 
 const router = Router();
 
 // GET /api/categories — public
+// Returns categories with live productCount computed from the Product collection.
 router.get("/", async (_req: Request, res: Response) => {
   try {
-    const categories = await Category.find().sort({ name: 1 });
-    res.json(categories);
+    const [categories, countAgg] = await Promise.all([
+      Category.find().sort({ name: 1 }),
+      // Aggregate live product counts grouped by category name
+      Product.aggregate<{ _id: string; count: number }>([
+        { $match: { status: "Published" } },
+        { $group: { _id: "$category", count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    // Build a lookup map: categoryName → count
+    const countMap = new Map<string, number>(
+      countAgg.map((item) => [item._id, item.count])
+    );
+
+    // Merge live counts into category documents
+    const result = categories.map((cat) => ({
+      ...cat.toObject(),
+      productCount: countMap.get(cat.name) ?? 0,
+    }));
+
+    res.json(result);
   } catch {
     res.status(500).json({ message: "Server error" });
   }

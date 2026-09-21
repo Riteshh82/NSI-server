@@ -4,16 +4,27 @@ import { protect } from "../middleware/auth";
 
 const router = Router();
 
-// GET /api/products — public, supports ?category=&status=&featured=&q=
+// GET /api/products — public, supports ?category=&status=&featured=&q=&productCode=
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const { category, status, featured, q, page = "1", limit = "20" } = req.query as Record<string, string>;
+    const { category, status, featured, q, productCode, page = "1", limit = "20" } =
+      req.query as Record<string, string>;
     const filter: Record<string, unknown> = {};
 
     if (category) filter.category = category;
     if (status) filter.status = status;
     if (featured === "true") filter.featured = true;
-    if (q) filter.$text = { $search: q };
+
+    // Full-text + productCode combined search via $or
+    if (q) {
+      filter.$or = [
+        { $text: { $search: q } },
+        { productCode: { $regex: q, $options: "i" } },
+        { name: { $regex: q, $options: "i" } },
+      ];
+    } else if (productCode) {
+      filter.productCode = { $regex: productCode, $options: "i" };
+    }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [products, total] = await Promise.all([
