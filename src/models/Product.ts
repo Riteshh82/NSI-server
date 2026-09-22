@@ -73,4 +73,27 @@ productSchema.index({ category: 1 });
 productSchema.index({ status: 1 });
 productSchema.index({ featured: 1 });
 
+productSchema.pre("validate", function (next) {
+  if (!this.slug) {
+    const slugify = (text: string) =>
+      text
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-");
+
+    const base = slugify(this.name || "");
+    const code = this.productCode ? slugify(this.productCode) : "";
+
+    if (code) {
+      this.slug = code;
+    } else {
+      const hash = Math.random().toString(36).slice(2, 7);
+      this.slug = `${base}-${hash}`;
+    }
+    this.slug = this.slug.slice(0, 80);
+  }
+  next();
+});
+
 export const Product = model<IProduct>("Product", productSchema);
