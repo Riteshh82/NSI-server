@@ -84,11 +84,11 @@ productSchema.pre("validate", function (next) {
 
     const base = slugify(this.name || "");
     const code = this.productCode ? slugify(this.productCode) : "";
+    const hash = Math.random().toString(36).slice(2, 7);
 
     if (code) {
-      this.slug = code;
+      this.slug = `${code}-${hash}`;
     } else {
-      const hash = Math.random().toString(36).slice(2, 7);
       this.slug = `${base}-${hash}`;
     }
     this.slug = this.slug.slice(0, 80);
