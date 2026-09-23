@@ -25,6 +25,10 @@ export interface IProduct extends Document {
   whatsappOrder: boolean;
   featured: boolean;
   bulkAvailable: boolean;
+  amazonClicks: number;
+  flipkartClicks: number;
+  myntraClicks: number;
+  whatsappClicks: number;
   status: "Published" | "Draft";
   views: number;
   createdAt: Date;
@@ -62,6 +66,10 @@ const productSchema = new Schema<IProduct>(
     whatsappOrder: { type: Boolean, default: true },
     featured: { type: Boolean, default: false },
     bulkAvailable: { type: Boolean, default: true },
+    amazonClicks: { type: Number, default: 0 },
+    flipkartClicks: { type: Number, default: 0 },
+    myntraClicks: { type: Number, default: 0 },
+    whatsappClicks: { type: Number, default: 0 },
     status: { type: String, enum: ["Published", "Draft"], default: "Draft" },
     views: { type: Number, default: 0 },
   },

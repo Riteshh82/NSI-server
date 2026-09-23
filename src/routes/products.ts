@@ -55,6 +55,33 @@ router.get("/:slug", async (req: Request, res: Response) => {
   }
 });
 
+// PATCH /api/products/:id/click — public
+router.patch("/:id/click", async (req: Request, res: Response) => {
+  try {
+    const { marketplace } = req.body;
+    if (!["amazon", "flipkart", "myntra", "whatsapp"].includes(marketplace)) {
+      res.status(400).json({ message: "Invalid marketplace" });
+      return;
+    }
+    
+    const updateField = `${marketplace}Clicks`;
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { [updateField]: 1 } },
+      { new: true }
+    );
+    
+    if (!product) {
+      res.status(404).json({ message: "Product not found" });
+      return;
+    }
+    res.json({ message: "Click recorded", clicks: product.get(updateField) });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 // POST /api/products — admin only
 router.post("/", protect, async (req: Request, res: Response) => {
   try {
