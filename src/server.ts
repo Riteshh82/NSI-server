@@ -9,6 +9,7 @@ import messageRoutes from "./routes/messages";
 import authRoutes from "./routes/auth";
 import settingsRoutes from "./routes/settings";
 import uploadRoutes from "./routes/upload";
+import newlyAddedRoutes from "./routes/newlyadded";
 
 dotenv.config();
 
@@ -72,6 +73,7 @@ app.use("/api/bulk-orders", bulkOrderRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/newlyadded", newlyAddedRoutes);
 
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get("/api/health", (_req, res) => {

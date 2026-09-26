@@ -18,9 +18,9 @@ router.get("/", async (req: Request, res: Response) => {
     // Full-text + productCode combined search via $or
     if (q) {
       filter.$or = [
-        { $text: { $search: q } },
-        { productCode: { $regex: q, $options: "i" } },
         { name: { $regex: q, $options: "i" } },
+        { shortDescription: { $regex: q, $options: "i" } },
+        { productCode: { $regex: q, $options: "i" } },
       ];
     } else if (productCode) {
       filter.productCode = { $regex: productCode, $options: "i" };
