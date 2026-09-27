@@ -18,6 +18,8 @@ export interface IProduct extends Document {
   };
   finishes: string[];
   price: number;
+  mrp: number;
+  sellingPrice: number;
   productCode: string;
   amazonUrl: string;
   flipkartUrl: string;
@@ -59,6 +61,8 @@ const productSchema = new Schema<IProduct>(
     specifications: { type: specSchema, default: () => ({}) },
     finishes: [{ type: String }],
     price: { type: Number, default: 0 },
+    mrp: { type: Number, default: 0 },
+    sellingPrice: { type: Number, default: 0 },
     productCode: { type: String, default: "", trim: true },
     amazonUrl: { type: String, default: "" },
     flipkartUrl: { type: String, default: "" },

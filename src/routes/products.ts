@@ -81,10 +81,27 @@ router.patch("/:id/click", async (req: Request, res: Response) => {
   }
 });
 
+// ── Helpers ──
+function validatePricing(body: any) {
+  if (body.mrp !== undefined || body.sellingPrice !== undefined || body.price !== undefined) {
+    const mrp = Number(body.mrp ?? 0);
+    const sellingPrice = Number(body.sellingPrice ?? body.price ?? 0);
+    
+    if (isNaN(mrp) || isNaN(sellingPrice)) throw new Error("Invalid numeric price values");
+    if (mrp < 0) throw new Error("MRP cannot be negative");
+    if (sellingPrice < 0) throw new Error("Selling Price cannot be negative");
+    if (sellingPrice > mrp && mrp !== 0) throw new Error("Selling Price cannot be greater than MRP");
+
+    body.mrp = mrp;
+    body.sellingPrice = sellingPrice;
+    body.price = sellingPrice; // Maintain backward compatibility
+  }
+}
 
 // POST /api/products — admin only
 router.post("/", protect, async (req: Request, res: Response) => {
   try {
+    validatePricing(req.body);
     const product = await Product.create(req.body);
     res.status(201).json(product);
   } catch (err: unknown) {
@@ -93,9 +110,9 @@ router.post("/", protect, async (req: Request, res: Response) => {
   }
 });
 
-// PUT /api/products/:id — admin only
 router.put("/:id", protect, async (req: Request, res: Response) => {
   try {
+    validatePricing(req.body);
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
