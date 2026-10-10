@@ -14,5 +14,5 @@
     "sourceMap": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/seed.ts"]
+  "exclude": ["node_modules", "dist", "src/seed.ts", "src/migrate-gridfs-to-r2.ts"]
 }

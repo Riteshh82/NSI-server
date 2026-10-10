@@ -23,7 +23,7 @@ const siteSettingsSchema = new Schema<ISiteSettings>(
     logoInitial: { type: String, default: "N" },
     phone: { type: String, default: "+91 98765 43210" },
     email: { type: String, default: "hello@nextsteelinnovation.in" },
-    address: { type: String, default: "Plot 14, Industrial Estate, Lower Parel, Mumbai, Maharashtra 400013" },
+    address: { type: String, default: "Plot No 39 Om Industrial Park Part 2, B/H Paavan Industrial Park Bakrol Bujrang Ahmedabad Gujarat -382430" },
     instagram: { type: String, default: "https://instagram.com/nextsteelinnovation" },
     facebook: { type: String, default: "https://facebook.com/nextsteelinnovation" },
     linkedin: { type: String, default: "https://linkedin.com/company/nextsteelinnovation" },

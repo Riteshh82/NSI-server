@@ -1,6 +1,10 @@
+// ── Load env vars FIRST, before any other imports ────────────────────────────
+// r2.ts reads process.env at module load time, so dotenv must run before import.
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import { connectDB } from "./db";
 import productRoutes from "./routes/products";
 import categoryRoutes from "./routes/categories";
@@ -11,14 +15,37 @@ import settingsRoutes from "./routes/settings";
 import uploadRoutes from "./routes/upload";
 import newlyAddedRoutes from "./routes/newlyadded";
 
-dotenv.config();
-
 // ── Startup validation ──────────────────────────────────────────────────────
 if (!process.env.MONGODB_URI) {
   throw new Error("MONGODB_URI is not defined. Set it in your .env file.");
 }
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET is not defined. Set it in your .env file.");
+}
+
+// R2 env var validation with actionable error messages
+const r2Checks: Array<{ key: string; hint: string }> = [
+  { key: "R2_ACCOUNT_ID",        hint: "Find it in Cloudflare Dashboard → R2 → right sidebar" },
+  { key: "R2_ACCESS_KEY_ID",     hint: "Create at R2 → Manage R2 API Tokens → Create API Token" },
+  { key: "R2_SECRET_ACCESS_KEY", hint: "Shown once when you create the API token" },
+  { key: "R2_BUCKET_NAME",       hint: "The name of the R2 bucket you created" },
+  {
+    key: "R2_PUBLIC_BASE_URL",
+    hint:
+      "Go to your R2 bucket → Settings → Public access → Enable r2.dev subdomain. " +
+      "Copy the URL shown (e.g. https://pub-xxxxx.r2.dev). " +
+      "Or add a custom domain under Custom Domains.",
+  },
+];
+for (const { key, hint } of r2Checks) {
+  const val = process.env[key];
+  if (!val || val.includes("yourdomain") || val.includes("<")) {
+    throw new Error(
+      `\n\n❌  ${key} is missing or still set to a placeholder value.\n` +
+      `   Current value: "${val ?? "(not set)"}"\n` +
+      `   How to fix  : ${hint}\n`
+    );
+  }
 }
 
 const app = express();

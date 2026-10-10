@@ -26,6 +26,7 @@ export interface IProduct extends Document {
   myntraUrl: string;
   whatsappOrder: boolean;
   featured: boolean;
+  isNewlyAdded: boolean;
   bulkAvailable: boolean;
   amazonClicks: number;
   flipkartClicks: number;
@@ -69,6 +70,7 @@ const productSchema = new Schema<IProduct>(
     myntraUrl: { type: String, default: "" },
     whatsappOrder: { type: Boolean, default: true },
     featured: { type: Boolean, default: false },
+    isNewlyAdded: { type: Boolean, default: false },
     bulkAvailable: { type: Boolean, default: true },
     amazonClicks: { type: Number, default: 0 },
     flipkartClicks: { type: Number, default: 0 },
