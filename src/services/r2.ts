@@ -34,18 +34,30 @@ export function getR2Client(): S3Client {
 export const r2Client = { get send() { return getR2Client().send.bind(getR2Client()); } };
 
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+export function isR2Configured(): boolean {
+  return Boolean(
+    process.env.R2_ACCOUNT_ID &&
+    process.env.R2_ACCESS_KEY_ID &&
+    process.env.R2_SECRET_ACCESS_KEY &&
+    process.env.R2_BUCKET_NAME &&
+    process.env.R2_PUBLIC_BASE_URL &&
+    !process.env.R2_PUBLIC_BASE_URL.includes("yourdomain") &&
+    !process.env.R2_PUBLIC_BASE_URL.includes("<")
+  );
+}
 
 /** Generate a collision-resistant object key that is safe for S3/R2. */
 export function generateObjectKey(
-  productId: string,
-  originalName: string
+  identifier: string,
+  originalName: string,
+  folder = "products"
 ): string {
   const random = randomBytes(12).toString("hex");
   const ext = path.extname(originalName).toLowerCase().replace(/[^.a-z0-9]/g, "") || ".jpg";
-  // Sanitise productId to prevent path traversal
-  const safeId = productId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
-  return `products/${safeId}/${random}${ext}`;
+  // Sanitise identifier and folder to prevent path traversal
+  const safeId = (identifier || "item").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
+  const safeFolder = (folder || "products").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 32);
+  return `${safeFolder}/${safeId}/${random}${ext}`;
 }
 
 /**
