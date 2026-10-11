@@ -238,16 +238,43 @@ router.post(
         (req.query.identifier as string | undefined) ||
         "item";
 
-      const key = generateObjectKey(identifier, req.file.originalname, folder);
-      const result = await uploadToR2(key, buf, detectedMime);
+      let uploadBuf = buf;
+      let uploadMime = detectedMime;
+
+      // Optimize JPEG / PNG / uncompressed raster images to WebP if not animated GIF or SVG
+      if (detectedMime !== "image/svg+xml" && detectedMime !== "image/gif") {
+        try {
+          let pipeline = sharp(buf);
+          // If unusually oversized (> 2560px), resize down maintaining aspect ratio
+          if (width > 2560 || height > 2560) {
+            pipeline = pipeline.resize({ width: 2560, height: 2560, fit: "inside", withoutEnlargement: true });
+          }
+          // Convert to efficient WebP (quality 85 for crisp e-commerce products)
+          const optimized = await pipeline.webp({ quality: 85, effort: 4 }).toBuffer({ resolveWithObject: true });
+          uploadBuf = optimized.data;
+          uploadMime = "image/webp";
+          width = optimized.info.width;
+          height = optimized.info.height;
+          format = "webp";
+        } catch {
+          // If conversion fails, fallback gracefully to original buffer
+          uploadBuf = buf;
+          uploadMime = detectedMime;
+        }
+      }
+
+      // Generate object key with appropriate extension
+      const ext = uploadMime === "image/webp" ? ".webp" : undefined;
+      const key = generateObjectKey(identifier, req.file.originalname, folder, ext);
+      const result = await uploadToR2(key, uploadBuf, uploadMime);
 
       const metadata = {
         filename: req.file.originalname,
-        size: req.file.size,
+        size: uploadBuf.length,
         width,
         height,
         format,
-        mimeType: detectedMime,
+        mimeType: uploadMime,
       };
 
       res.status(201).json({

@@ -10,10 +10,12 @@ const router = Router();
  */
 router.get("/", async (_req: Request, res: Response) => {
   try {
-    let settings = await SiteSettings.findOne();
+    let settings = await SiteSettings.findOne().lean();
     if (!settings) {
-      settings = await SiteSettings.create({});
+      const created = await SiteSettings.create({});
+      return void res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=600").json(created);
     }
+    res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
     res.json(settings);
   } catch (err) {
     throw err;

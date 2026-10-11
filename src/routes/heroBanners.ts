@@ -31,7 +31,7 @@ router.get("/", async (_req: Request, res: Response, next: NextFunction) => {
       ],
     };
 
-    const banners = await HeroBanner.find(query).sort({ order: 1, createdAt: -1 });
+    const banners = await HeroBanner.find(query).sort({ order: 1, createdAt: -1 }).lean();
 
     // Set cache headers: allow client/edge caching with short TTL and revalidation
     res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=120");

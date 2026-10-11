@@ -10,7 +10,7 @@ const router = Router();
 router.get("/", async (_req: Request, res: Response) => {
   try {
     const [categories, countAgg] = await Promise.all([
-      Category.find().sort({ name: 1 }),
+      Category.find().sort({ name: 1 }).lean(),
       // Aggregate live product counts grouped by category name
       Product.aggregate<{ _id: string; count: number }>([
         { $match: { status: "Published" } },
@@ -25,10 +25,11 @@ router.get("/", async (_req: Request, res: Response) => {
 
     // Merge live counts into category documents
     const result = categories.map((cat) => ({
-      ...cat.toObject(),
+      ...cat,
       productCount: countMap.get(cat.name) ?? 0,
     }));
 
+    res.setHeader("Cache-Control", "public, max-age=120, stale-while-revalidate=300");
     res.json(result);
   } catch {
     res.status(500).json({ message: "Server error" });

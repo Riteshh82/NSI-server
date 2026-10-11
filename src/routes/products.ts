@@ -30,9 +30,18 @@ router.get("/", async (req: Request, res: Response) => {
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [products, total] = await Promise.all([
-      Product.find(filter).skip(skip).limit(parseInt(limit)).sort({ createdAt: -1 }),
+      Product.find(filter)
+        .skip(skip)
+        .limit(parseInt(limit))
+        .sort({ createdAt: -1 })
+        .lean(),
       Product.countDocuments(filter),
     ]);
+
+    // Send HTTP cache headers for public queries
+    if (status === "Published" || !status) {
+      res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
+    }
 
     res.json({ products, total, page: parseInt(page), limit: parseInt(limit) });
   } catch (err) {
@@ -43,14 +52,19 @@ router.get("/", async (req: Request, res: Response) => {
 // GET /api/products/:slug — public
 router.get("/:slug", async (req: Request, res: Response) => {
   try {
-    const product = await Product.findOne({ slug: req.params.slug });
+    // Atomically increment views and return the product in one query
+    const product = await Product.findOneAndUpdate(
+      { slug: req.params.slug },
+      { $inc: { views: 1 } },
+      { new: true }
+    ).lean();
+
     if (!product) {
       res.status(404).json({ message: "Product not found" });
       return;
     }
-    // Increment views
-    product.views += 1;
-    await product.save();
+
+    res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
     res.json(product);
   } catch (err) {
     res.status(500).json({ message: "Server error" });

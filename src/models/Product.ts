@@ -83,9 +83,10 @@ const productSchema = new Schema<IProduct>(
 );
 
 productSchema.index({ name: "text", shortDescription: "text" });
-productSchema.index({ category: 1 });
-productSchema.index({ status: 1 });
-productSchema.index({ featured: 1 });
+productSchema.index({ category: 1, status: 1, createdAt: -1 });
+productSchema.index({ status: 1, createdAt: -1 });
+productSchema.index({ status: 1, featured: 1, createdAt: -1 });
+productSchema.index({ status: 1, isNewlyAdded: 1, createdAt: -1 });
 
 productSchema.pre("validate", function (next) {
   if (!this.slug) {

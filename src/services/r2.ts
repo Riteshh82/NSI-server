@@ -50,10 +50,11 @@ export function isR2Configured(): boolean {
 export function generateObjectKey(
   identifier: string,
   originalName: string,
-  folder = "products"
+  folder = "products",
+  customExtension?: string
 ): string {
   const random = randomBytes(12).toString("hex");
-  const ext = path.extname(originalName).toLowerCase().replace(/[^.a-z0-9]/g, "") || ".jpg";
+  const ext = customExtension || path.extname(originalName).toLowerCase().replace(/[^.a-z0-9]/g, "") || ".jpg";
   // Sanitise identifier and folder to prevent path traversal
   const safeId = (identifier || "item").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
   const safeFolder = (folder || "products").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 32);

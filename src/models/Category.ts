@@ -21,4 +21,6 @@ const categorySchema = new Schema<ICategory>(
   { timestamps: true }
 );
 
+categorySchema.index({ name: 1 });
+
 export const Category = model<ICategory>("Category", categorySchema);

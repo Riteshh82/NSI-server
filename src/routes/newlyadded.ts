@@ -7,7 +7,10 @@ const router = Router();
 // GET /api/newlyadded (Public)
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const newlyAdded = await NewlyAdded.find({ isActive: true }).sort({ order: 1, createdAt: -1 });
+    const newlyAdded = await NewlyAdded.find({ isActive: true })
+      .sort({ order: 1, createdAt: -1 })
+      .lean();
+    res.setHeader("Cache-Control", "public, max-age=120, stale-while-revalidate=300");
     res.json(newlyAdded);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
