@@ -15,6 +15,7 @@ import settingsRoutes from "./routes/settings";
 import uploadRoutes from "./routes/upload";
 import newlyAddedRoutes from "./routes/newlyadded";
 import heroBannerRoutes from "./routes/heroBanners";
+import cookieParser from "cookie-parser";
 
 // ── Startup validation ──────────────────────────────────────────────────────
 if (!process.env.MONGODB_URI) {
@@ -79,7 +80,9 @@ app.use(
   })
 );
 
-// ── Body parsing ─────────────────────────────────────────────────────────────
+// ── Body & Cookie parsing ───────────────────────────────────────────────────
+app.set("trust proxy", 1);
+app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
